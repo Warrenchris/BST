@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Definition of a BST node
+typedef struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+} TreeNode;
+
+// Helper function to create a new BST node
+TreeNode* createNode(int data) {
+    TreeNode* newNode = (TreeNode*)malloc(sizeof(TreeNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Recursive function to construct BST from in-order and post-order arrays
+TreeNode* buildBST(int inOrder[], int postOrder[], int inStart, int inEnd, int postStart, int postEnd) {
+    if (inStart > inEnd || postStart > postEnd)
+        return NULL;
+
+    // The last element in postOrder[] is the root
+    int rootValue = postOrder[postEnd];
+    TreeNode* root = createNode(rootValue);
+
+    // Find the index of root in inOrder[]
+    int rootIndex;
+    for (rootIndex = inStart; rootIndex <= inEnd; rootIndex++) {
+        if (inOrder[rootIndex] == rootValue)
+            break;
+    }
+
+    // Recursively build left and right subtrees
+    root->left = buildBST(inOrder, postOrder, inStart, rootIndex - 1, postStart, postStart + (rootIndex - inStart) - 1);
+    root->right = buildBST(inOrder, postOrder, rootIndex + 1, inEnd, postStart + (rootIndex - inStart), postEnd - 1);
+
+    return root;
+}
+
+// Function to perform breadth-first search traversal of BST
+void bfs_traverse(TreeNode* root) {
+    if (root == NULL)
+        return;
+
+    // Queue for BFS
+    TreeNode* queue[100];
+    int front = 0, rear = 0;
+    queue[rear++] = root;
+
+    while (front < rear) {
+        TreeNode* current = queue[front++];
+        printf("%d ", current->data);
+
+        if (current->left)
+            queue[rear++] = current->left;
+        if (current->right)
+            queue[rear++] = current->right;
+    }
+}
+
+// Function to construct BST and return the root
+TreeNode* bst_construct(int inOrder[], int postOrder[], int size) {
+    if (size <= 0)
+        return NULL;
+    
+    return buildBST(inOrder, postOrder, 0, size - 1, 0, size - 1);
+}
+
+int main() {
+    // In-order and Post-order traversal arrays
+    int inOrder[] = {5, 10, 15, 20, 25, 30, 45};
+    int postOrder[] = {5, 15, 10, 25, 45, 30, 20};
+    int size = sizeof(inOrder) / sizeof(inOrder[0]);
+
+    // Construct BST
+    TreeNode* root = bst_construct(inOrder, postOrder, size);
+
+    // Perform BFS traversal and print elements
+    printf("BFS Traversal: ");
+    bfs_traverse(root);
+    printf("\n");
+
+    return 0;
+}
